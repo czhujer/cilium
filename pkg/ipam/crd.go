@@ -390,7 +390,7 @@ func (n *nodeStore) allocate(ip net.IP) (*ipamTypes.AllocationIP, error) {
 }
 
 // allocateNext allocates the next available IP or returns an error
-func (n *nodeStore) allocateNext(allocated ipamTypes.AllocationMap, family Family) (net.IP, *ipamTypes.AllocationIP, error) {
+func (n *nodeStore) allocateNext(allocated ipamTypes.AllocationMap, family Family, owner string) (net.IP, *ipamTypes.AllocationIP, error) {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 
@@ -413,6 +413,18 @@ func (n *nodeStore) allocateNext(allocated ipamTypes.AllocationMap, family Famil
 
 			if DeriveFamily(parsedIP) != family {
 				continue
+			}
+
+			if ipInfo.Owner != "" {
+				log.WithFields(logrus.Fields{
+					"ip":            ip,
+					"requiredOwner": ipInfo.Owner,
+					"realOwner":     owner,
+				}).Info("Parsed IP address in CiliumNode")
+
+				if ipInfo.Owner != owner {
+					continue
+				}
 			}
 
 			return parsedIP, &ipInfo, nil
@@ -602,7 +614,7 @@ func (a *crdAllocator) AllocateNext(owner string) (*AllocationResult, error) {
 	a.mutex.Lock()
 	defer a.mutex.Unlock()
 
-	ip, ipInfo, err := a.store.allocateNext(a.allocated, a.family)
+	ip, ipInfo, err := a.store.allocateNext(a.allocated, a.family, owner)
 	if err != nil {
 		return nil, err
 	}
@@ -621,7 +633,8 @@ func (a *crdAllocator) AllocateNextWithoutSyncUpstream(owner string) (*Allocatio
 	a.mutex.Lock()
 	defer a.mutex.Unlock()
 
-	ip, ipInfo, err := a.store.allocateNext(a.allocated, a.family)
+	ip, ipInfo, err := a.store.allocateNext(a.allocated, a.family, owner)
+
 	if err != nil {
 		return nil, err
 	}
