@@ -416,15 +416,14 @@ func (n *nodeStore) allocateNext(allocated ipamTypes.AllocationMap, family Famil
 			}
 
 			// owner logic
-			ownerWithNs := fmt.Sprintf("kube-system/%s", owner)
 			log.WithFields(logrus.Fields{
 				"ip":            ip,
 				"owner":         ipInfo.Owner,
-				"podNameWithNs": ownerWithNs,
+				"podNameWithNs": owner,
 			}).Info("crdIPAM: parsed IP in CiliumNode")
 
 			if ipInfo.Owner != "" {
-				if ipInfo.Owner != ownerWithNs {
+				if ipInfo.Owner != owner {
 					continue
 				}
 			}
