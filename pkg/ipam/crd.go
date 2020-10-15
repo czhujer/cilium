@@ -415,14 +415,13 @@ func (n *nodeStore) allocateNext(allocated ipamTypes.AllocationMap, family Famil
 				continue
 			}
 
-			// owner logic
-			log.WithFields(logrus.Fields{
-				"ip":            ip,
-				"owner":         ipInfo.Owner,
-				"podNameWithNs": owner,
-			}).Info("crdIPAM: parsed IP in CiliumNode")
-
 			if ipInfo.Owner != "" {
+				log.WithFields(logrus.Fields{
+					"ip":            ip,
+					"requiredOwner": ipInfo.Owner,
+					"realOwner":     owner,
+				}).Info("parsed IP address in CiliumNode")
+
 				if ipInfo.Owner != owner {
 					continue
 				}
