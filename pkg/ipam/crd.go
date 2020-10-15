@@ -420,7 +420,7 @@ func (n *nodeStore) allocateNext(allocated ipamTypes.AllocationMap, family Famil
 					"ip":            ip,
 					"requiredOwner": ipInfo.Owner,
 					"realOwner":     owner,
-				}).Info("parsed IP address in CiliumNode")
+				}).Info("Parsed IP address in CiliumNode")
 
 				if ipInfo.Owner != owner {
 					continue
